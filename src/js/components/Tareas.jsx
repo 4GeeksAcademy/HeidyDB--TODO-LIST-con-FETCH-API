@@ -48,10 +48,10 @@ const Tareas = () => {
   return (
     <div>
 
-      <div className="container s-flex align-items-center " role="alert" >
+      <div className=" contenedor container s-flex align-items-center " role="alert" >
 
         <div> {/* introducir un valor (una tarea) al dar enter */}
-          <input type="text " className="form-control mt-100px"
+          <input type="text " className="form-control mt-110px"
             placeholder='What needs to be done?'
             value={tareaNueva}
             onChange={(e) => { setTareaNueva(e.target.value) }}
@@ -66,7 +66,7 @@ const Tareas = () => {
         </div>
 
         <div>
-          <ul className="list-group mt-3 w-100">
+            <ul className="list-group mt-3 w-100">
             {/* map recorre el arreglo devolviendo el valor en cada posicion */}
             {tareas.map((value, index) => (
               <li key={index} className="list-group-item 
