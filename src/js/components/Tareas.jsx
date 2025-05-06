@@ -9,11 +9,61 @@ const Tareas = () => {
   const [tareaNueva, setTareaNueva] = useState(""); //  esta es cada tarea nueva que entra
   const [tareas, setTareas] = useState([]); //esta es la lista de tareas
   const [editarIndice, setEditarIndice] = useState(null);
+
+
+  function getTodos(){
+    //la URI, el metodo. lleva coma entre la URI y el metodo
+    //fetch hace la peticion 
+    fetch("https://playground.4geeks.com/todo/users/heidydb" ,
+      {
+        method: "GET"
+      })
+      //codigo del status , info en formato json .
+    .then((response) => {
+      if (!response.ok) throw new Error("Error al obtener tareas");
+      return response.json();
+    })
+    //info en formato JavaScript . //  maneja la respuesta si todo va bien 
+    .then((data) => {
+      setTareas(data.todos);
+    })
+    //manejo de errores . captura cualquier error 
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+  }
+  }
  
+//AGREGAR TAREAS ***********
+  function syncTareasConAPI(nuevasTareas) {
+    fetch("https://playground.4geeks.com/todo/users/heidydb", 
+      {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(nuevasTareas)
+    })
+    .then((response) => {
+      if (!response.ok) throw new Error("Error al guardar tareas");
+      return response.json();
+    })
+    .then((data) => {
+      console.log("Tareas sincronizadas:", data);
+      setTareas(nuevasTareas); // actualiza localmente también
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+  }
   
+//MODIFICO CADA FUNCION PARA SINCRONIZAR CON LA API (agregar(), quitar(), guardaEdicio(), realizada())
+
    const agregar = () => { // esta tarea se agrega al dar enter en el teclado
     if (tareaNueva !== "") {
-      setTareas([...tareas, { texto: tareaNueva, completada: false }]); // añado la tarea nueva a la lista de tareas
+      const nuevasTareas = [...tareas, { label: tareaNueva, done: false }]; // añado la tarea 
+      // nueva a la lista de tareas Susutituyo texto por label, completado por done , pues asi esta hecha la API
+      syncTareasConAPI(nuevasTareas);
       setTareaNueva(""); //limpio el input para la proxima entrada 
     }
    }
