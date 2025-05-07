@@ -10,8 +10,25 @@ const Tareas = () => {
   const [tareas, setTareas] = useState([]); //esta es la lista de tareas
   const [editarIndice, setEditarIndice] = useState(null);
 
-  const apiUrl = "https://playground.4geeks.com/todo/users/heidydb";
+ // const apiUrl = "https://playground.4geeks.com/todo/users/heidydb";
 
+
+ /*useEffect(() => {
+  // Verifica si el usuario existe, si no, lo crea
+  fetch(apiUrl)
+    .then((res) => {
+      if (res.status === 404) {
+        return fetch(apiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify([]),
+        });
+      }
+      return res;
+    })
+    .then(() => getTodos())
+    .catch((err) => console.error("Error al inicializar usuario:", err));
+}, []);*/
 
   function getTodos(){
     //la URI, el metodo. lleva coma entre la URI y el metodo
@@ -22,10 +39,11 @@ const Tareas = () => {
       })
       //codigo del status , info en formato json .
     .then((response) => {
-      if (!response.ok) throw new Error("Error al obtener tareas");
+      if (!response.ok) throw new Error("Error al obtener tareas");//si el codigo es 400 0 500
+      //  enviar error que sera tratado por el catch 
       return response.json();
     })
-    //info en formato JavaScript . //  maneja la respuesta si todo va bien 
+    //info en formato JavaScript . //  maneja la respuesta si todo va bien (response.ok es un 200)
     .then((data) => {
       setTareas(data.todos);
     })
