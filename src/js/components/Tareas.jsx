@@ -10,6 +10,8 @@ const Tareas = () => {
   const [tareas, setTareas] = useState([]); //esta es la lista de tareas
   const [editarIndice, setEditarIndice] = useState(null);
 
+  const apiUrl = "https://playground.4geeks.com/todo/users/heidydb";
+
 
   function getTodos(){
     //la URI, el metodo. lleva coma entre la URI y el metodo
@@ -70,28 +72,30 @@ const Tareas = () => {
 
    const editar =(index)=> {
     
-      setTareaNueva(tareas[index].texto); // carga el texto al input
+      setTareaNueva(tareas[index].label); // carga el texto al input. reemplazo texto por label 
       setEditarIndice(index); // marca qué tarea se está editando
    };
 
    const guardarEdicion = () => {
       if (tareaNueva.trim() === "") return;
-      const nuevasTareas = [...tareas];
-      nuevasTareas[editarIndice].texto = tareaNueva;
-      setTareas(nuevasTareas);
+      const nuevasTareas = [...tareas]; // asigno nueva direccion de memoria al array , no uso el que ya existe sino una copia
+      nuevasTareas[editarIndice].label = tareaNueva;
+      syncTareasConAPI(nuevasTareas);
       setTareaNueva("");
       setEditarIndice(null);
    };
 
    const quitar = (indiceEliminar) => { // esta tarea se quitara con el evento onClick a la X
-    setTareas(tareas.filter((_, index) => index !== indiceEliminar)); //se hace un nuevo arreglo
+   const nuevasTareas= tareas.filter((_, index) => index !== indiceEliminar); //se hace un nuevo arreglo
     //sin  el elemento cuyo indice es indiceEliminar
-   }
+    syncTareasConAPI(nuevasTareas); // no0 uso el useState  setTareas, sino que trabajo en la API 
+   }    
 
    const realizada = (index) => {
     const nuevasTareas = [...tareas];
-    nuevasTareas[index].completada = !nuevasTareas[index].completada; // si es falso recibe true ...si ess true recibe falso
-    setTareas(nuevasTareas);
+    nuevasTareas[index].done = !nuevasTareas[index].done; // si es falso recibe true ...si ess true recibe falso
+    //setTareas(nuevasTareas); esto era para trabajar local con estado 
+    syncTareasConAPI(nuevasTareas); // ahora trabajo en la API para no perder los valores 
   };
 
    
@@ -118,20 +122,21 @@ const Tareas = () => {
         <div>
             <ul className="list-group mt-3 w-100">
             {/* map recorre el arreglo devolviendo el valor en cada posicion */}
-            {tareas.map((value, index) => (
+            {tareas.map((tarea, index) => (
               <li key={index} className="list-group-item 
                   d-flex justify-content-between align-items-center">
                   {/* si completada es true, tacha la tarea */}
-                  <span className={value.completada ? "text-decoration-line-through text-muted" : ""}>
-                  {value.texto}
+                  <span className={tarea.done ? "text-decoration-line-through text-muted" : ""}>
+                  {tarea.label}
                   </span>
 
-
+                  {/* ckeckbox para marca tarea como hecha */}
                   <div className="form-check">
                     <input className=" me-2 m-auto form-check-input" type="checkbox" value=""
-                    id="checkDefault" checked={value.completada}
+                    id="checkDefault" checked={tarea.done}
                     onChange={() => realizada(index)} />
 
+                   {/* boton editar tarea */}
                    <button
                     type="button"
                     className="btn btn-sm btn-outline-secondary me-2"
@@ -140,6 +145,8 @@ const Tareas = () => {
                     <i className="fa-solid fa-pencil"></i>
                    </button>
 
+
+                  {/* X para cerrar tarea */}
                    <button type="button" className="btn-close me-2 m-auto" aria-label="Close"
                     onClick={() => quitar(index)}></button>
                   </div>
