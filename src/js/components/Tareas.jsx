@@ -70,7 +70,7 @@ const Tareas = () => {
 
   //AGREGAR, ACTUALIZAR TAREAS ***********
   function postTodosApi(nuevasTareas) {
-    console.log(JSON.stringify(nuevasTareas, null, 2) );
+    console.log(JSON.stringify(nuevasTareas, null, 2));
 
     fetch("https://playground.4geeks.com/todo/todos/heidydb",
       {
@@ -86,6 +86,7 @@ const Tareas = () => {
       })
       .then((data) => {
         console.log("Tareas sincronizadas:", data);
+
         setTareas(nuevasTareas); // actualiza localmente también
       })
       .catch((error) => {
@@ -93,89 +94,135 @@ const Tareas = () => {
       });
   }
 
-   function putTodosApi(nuevasTareas) { //actualizar uba tarea 
-    console.log(nuevasTareas )
+  /* function putTodosApi(nuevasTareas) { //actualizar uba tarea 
+     console.log(nuevasTareas)
+ 
+     fetch("https://playground.4geeks.com/todo/todos/heidydb",
+       {
+         method: "PUT",
+         headers: {
+           "Content-Type": "application/json"
+         },
+         body: JSON.stringify(nuevasTareas)
+       })
+       .then((response) => {
+         if (!response.ok) throw new Error("Error al actualizar tareas");
+         return response.json();
+       })
+       .then((data) => {
+         console.log("Tareas sincronizadas:", data);
+         setTareas(nuevasTareas); // actualiza localmente también
+       })
+       .catch((error) => {
+         console.error("Error:", error);
+       });
+   }*/
 
-    fetch("https://playground.4geeks.com/todo/todos/heidydb",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(nuevasTareas)
-      })
-      .then((response) => {
-        if (!response.ok) throw new Error("Error al guardar tareas");
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Tareas sincronizadas:", data);
-        setTareas(nuevasTareas); // actualiza localmente también
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }
 
+  /* function deleteTodosApi(nuevasTareas) {
+     fetch("https://playground.4geeks.com/todo/users/heidydb",
+       {
+         method: "DELETE",
+       })
+       .then((response) => {
+         if (!response.ok) throw new Error("Error al ELIMINAR tareas");
+         return response.json();
+       })
+       .then((data) => {
+         console.log("Tarea eliminada:", data);
+         setTareas(nuevasTareas); // 
+       })
+       .catch((error) => {
+         console.error("Error:", error);
+       });
+       }*/
 
- /* function deleteTodosApi(nuevasTareas) {
-    fetch("https://playground.4geeks.com/todo/users/heidydb",
-      {
-        method: "DELETE",
-      })
-      .then((response) => {
-        if (!response.ok) throw new Error("Error al ELIMINAR tareas");
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Tarea eliminada:", data);
-        setTareas(nuevasTareas); // 
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-      }*/
-  
 
   //MODIFICO CADA FUNCION PARA SINCRONIZAR CON LA API (agregar(), quitar(), guardaEdicion(), realizada())
 
-  const agregar = () => { // esta tarea se agrega al dar enter en el teclado
+  const agregar = () => { // esta tarea se agrega la tarea al dar enter en el teclado
     if (tareaNueva !== "") {
-      const nuevasTareas =  { label: tareaNueva, is_done: false }; // añado la tarea 
+      const nuevasTareas = { label: tareaNueva, is_done: false }; // añado la tarea 
       // nueva a la lista de tareas Susutituyo texto por label, completado por is_done , pues asi esta hecha la API
       postTodosApi(nuevasTareas);
       setTareaNueva(""); //limpio el input para la proxima entrada 
     }
   }
 
-  const editar = (index) => {
 
-    setTareaNueva(tareas[index].label); // carga el texto al input. reemplazo texto por label 
+  const editar = (index) => { //esta funcion no ncesito modificarla porque ella no hace nada con la API, solo graficamente
+    setTareaNueva(tareas[index].label); // carga el texto al input. solos reemplazo .texto por .label 
     setEditarIndice(index); // marca qué tarea se está editando
   };
 
-  const guardarEdicion = () => {
+
+  const guardarEdicion = () => { // esta funcion guarda despues de modificar una tarea. y usa el PUT para guardar en la API
     if (tareaNueva.trim() === "") return;
-    const nuevasTareas = [...tareas]; // asigno nueva direccion de memoria al array , no uso el que ya existe sino una copia
-    nuevasTareas[editarIndice].label = tareaNueva;
-    postTodosApi(nuevasTareas);
-    setTareaNueva("");
-    setEditarIndice(null);
+    const tareaEditada = { ...tareas[editarIndice], label: tareaNueva }
+    fetch(`https://playground.4geeks.com/todo/todos/${tareaEditada.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(tareaEditada)
+      })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Error al actualizar la tarea con id ${tareaEditada.id}`);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Tareas sincronizadas:", data); 
+        const nuevasTareas = [...tareas];
+        nuevasTareas[editarIndice] = data;
+        setTareas(nuevasTareas);
+        setTareaNueva("");
+        setEditarIndice(null);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
 
- /* const quitar = (indiceEliminar) => { // esta tarea se quitara con el evento onClick a la X
-    const nuevasTareas = tareas.filter((_, index) => index !== indiceEliminar); //se hace un nuevo arreglo
-    //sin  el elemento cuyo indice es indiceEliminar
-    postTodosApi(nuevasTareas); // no uso el useState  setTareas, sino que trabajo en la API 
-  }*/
+  /* const quitar = (indiceEliminar) => { // esta tarea se quitara con el evento onClick a la X
+     const nuevasTareas = tareas.filter((_, index) => index !== indiceEliminar); //se hace un nuevo arreglo
+     //sin  el elemento cuyo indice es indiceEliminar
+     postTodosApi(nuevasTareas); // no uso el useState  setTareas, sino que trabajo en la API 
+   }*/
 
-  const realizada = (index) => {
-    const nuevasTareas = [...tareas];
-    nuevasTareas[index].is_done = !nuevasTareas[index].is_done; // si es falso recibe true ...si ess true recibe falso
-   postTodosApi(nuevasTareas);
-    setTareas(nuevasTareas); //esto era para trabajar local con estado 
-     // ahora trabajo en la API para no perder los valores 
+
+
+  const realizada = (editarIndice) => { // en esta funcion marco en el checkbox las tareas ya hechas 
+    const tareaEditada = { ...tareas[editarIndice], is_done: !tareas[editarIndice].is_done}// si es falso recibe true 
+    // ...si ess true recibe falso al marcar y desmarcar 
+        
+     fetch(`https://playground.4geeks.com/todo/todos/${tareaEditada.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(tareaEditada)
+      })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Error al marcar como hecha la tarea con id ${tareaEditada.id}`);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Tareas sincronizadas:", data); 
+        const nuevasTareas = [...tareas];
+        nuevasTareas[editarIndice] = data;
+        setTareas(nuevasTareas);
+       // setTareaNueva("");
+       // setEditarIndice(null);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
   };
+    // setTareas(nuevasTareas); //esto era para trabajar local con estado 
+    // ahora trabajo en la API para no perder los valores 
+//   };
 
 
   return (
