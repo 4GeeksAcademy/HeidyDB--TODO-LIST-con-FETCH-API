@@ -152,13 +152,11 @@ fetch("https://playground.4geeks.com/todo/todos/heidydb",
          console.log("Código de respuesta:", response.status); // estoy probando si hay error 400 o exito 200
         if (!response.ok) throw new Error("error al eliminar la tarea");
         console.log("Tarea eliminada correctamente");
-      })
-      .then((data) => {
-        console.log("Tarea eliminada:", data); 
         const arregloSinTarea = tareas.filter((_, index) => index !== indiceEliminar); //se hace un nuevo arreglo
         //sin  el elemento cuyo indice es indiceEliminar , asi se elimina del array
         setTareas(arregloSinTarea); // actializo el estado sin la tarea  
-        tareas[indiceEliminar].label = "";  // limpio el li de la tarea  
+        //con el metodo DELETE no hace falta el segundo .then()
+      
       })
       .catch((error) => {
         console.error("Error:", error);
